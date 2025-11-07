@@ -817,7 +817,7 @@ def render_calendar_view():
     month_start = selected_date.replace(day=1)
     month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
     
-    month_events = [e for e in events if month_start <= str(e['start'])).date() <= month_end]
+    month_events = [e for e in events if month_start <= datetime.strptime(e['start'], '%Y-%m-%d').date()(e['start'])).date() <= month_end]
     
     # Display events
     st.write(f"### Events for {selected_date.strftime('%B %Y')}")
