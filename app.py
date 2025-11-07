@@ -19,6 +19,19 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 import warnings
 warnings.filterwarnings('ignore')
 
+# Additional imports for comprehensive features
+try:
+    import qrcode
+    HAS_QRCODE = True
+except ImportError:
+    HAS_QRCODE = False
+
+try:
+    import segno
+    HAS_SEGNO = True
+except ImportError:
+    HAS_SEGNO = False
+
 # Page Configuration
 st.set_page_config(
     page_title="Solar PV Test Project Management",
@@ -89,13 +102,21 @@ def init_session_state():
         'holidays': [],
         'signatures': [],
         'audit_trail': [],
+        'automation_rules': [],
+        'test_protocols': [],
+        'approval_levels': [],
+        'performance_metrics': [],
+        'maintenance_logs': [],
+        'workload_analysis': [],
+        'report_templates': [],
+        'sample_workflow_states': ['Created', 'Received', 'Conditioning', 'Testing', 'Analysis', 'Completed', 'Archived'],
         'initialized': False
     }
-    
+
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
-    
+
     # Initialize with sample data if not already done
     if not st.session_state.initialized:
         init_sample_data()
@@ -352,6 +373,253 @@ def init_sample_data():
     st.session_state.signatures = []
     st.session_state.audit_trail = []
 
+    # Comprehensive Feature Additions
+
+    # Automation Rules
+    st.session_state.automation_rules = [
+        {
+            'id': 'AR001',
+            'name': 'Overdue Test Alert',
+            'trigger': 'Test overdue > 2 days',
+            'condition': 'test_date < current_date - 2 days',
+            'action': 'Send email to manager',
+            'recipients': ['john.smith@company.com'],
+            'enabled': True,
+            'priority': 'High',
+            'created_date': datetime.now().date()
+        },
+        {
+            'id': 'AR002',
+            'name': 'Calibration Due Warning',
+            'trigger': 'Calibration due in 30 days',
+            'condition': 'next_calibration - current_date <= 30 days',
+            'action': 'Create notification and email',
+            'recipients': ['equipment.admin@company.com'],
+            'enabled': True,
+            'priority': 'Medium',
+            'created_date': datetime.now().date()
+        }
+    ]
+
+    # Test Protocols with detailed steps
+    st.session_state.test_protocols = [
+        {
+            'id': 'TP001',
+            'test_method_id': 'TM001',
+            'name': 'Power Output Measurement Protocol',
+            'version': '1.0',
+            'steps': [
+                {'step': 1, 'instruction': 'Set up solar simulator to STC conditions (1000 W/m², 25°C, AM 1.5)',
+                 'expected_result': 'Stable irradiance reading', 'acceptance': 'Within ±2%'},
+                {'step': 2, 'instruction': 'Connect sample to I-V tracer',
+                 'expected_result': 'Proper electrical connection', 'acceptance': 'No open circuit'},
+                {'step': 3, 'instruction': 'Allow 5-minute stabilization period',
+                 'expected_result': 'Temperature stabilized', 'acceptance': '±1°C'},
+                {'step': 4, 'instruction': 'Perform I-V sweep and record data',
+                 'expected_result': 'Complete I-V curve captured', 'acceptance': 'All points recorded'},
+                {'step': 5, 'instruction': 'Calculate Pmax, Voc, Isc, FF',
+                 'expected_result': 'Parameters calculated', 'acceptance': 'Within datasheet ±3%'}
+            ],
+            'safety_notes': 'Wear safety glasses. Ensure proper grounding. Do not touch terminals during test.',
+            'equipment_setup': 'Solar Simulator at 1000W/m², Temperature chamber at 25°C ±2°C',
+            'pass_criteria': 'Power output within ±3% of rated power'
+        },
+        {
+            'id': 'TP002',
+            'test_method_id': 'TM002',
+            'name': 'Thermal Cycling Protocol',
+            'version': '1.0',
+            'steps': [
+                {'step': 1, 'instruction': 'Perform initial electrical characterization',
+                 'expected_result': 'Baseline power measured', 'acceptance': 'Pmax recorded'},
+                {'step': 2, 'instruction': 'Load sample in environmental chamber',
+                 'expected_result': 'Sample secured properly', 'acceptance': 'Visual check OK'},
+                {'step': 3, 'instruction': 'Program 200 thermal cycles: -40°C to +85°C',
+                 'expected_result': 'Cycle parameters set', 'acceptance': 'Chamber accepts program'},
+                {'step': 4, 'instruction': 'Run cycling for ~800 hours',
+                 'expected_result': 'Cycles complete without chamber fault', 'acceptance': 'All cycles completed'},
+                {'step': 5, 'instruction': 'Perform final electrical characterization',
+                 'expected_result': 'Final power measured', 'acceptance': 'Power degradation < 5%'}
+            ],
+            'safety_notes': 'High/low temperature hazard. Use protective equipment when accessing chamber.',
+            'equipment_setup': 'Environmental chamber with temperature range -40°C to +85°C',
+            'pass_criteria': 'No visual defects, power degradation < 5%'
+        }
+    ]
+
+    # Approval Levels
+    st.session_state.approval_levels = [
+        {
+            'level': 1,
+            'role': 'Test Technician',
+            'description': 'Initial data review and validation',
+            'approvers': ['John Smith', 'Mike Johnson'],
+            'required_for': ['Test Results Entry', 'Sample Receipt']
+        },
+        {
+            'level': 2,
+            'role': 'QA Engineer',
+            'description': 'Quality assurance review',
+            'approvers': ['Jane Doe'],
+            'required_for': ['Test Results', 'Calibration Reports']
+        },
+        {
+            'level': 3,
+            'role': 'Test Manager',
+            'description': 'Technical approval and sign-off',
+            'approvers': ['Sarah Manager'],
+            'required_for': ['Final Test Reports', 'Non-conformance Reports']
+        },
+        {
+            'level': 4,
+            'role': 'Laboratory Director',
+            'description': 'Final authorization and release',
+            'approvers': ['Dr. Director'],
+            'required_for': ['Certification Reports', 'Major Deviations']
+        }
+    ]
+
+    # Report Templates
+    st.session_state.report_templates = [
+        {
+            'id': 'RT001',
+            'name': 'Solar Panel Test Report',
+            'type': 'Test Result',
+            'standard': 'IEC 61215-2:2016',
+            'sections': [
+                'Executive Summary',
+                'Sample Information',
+                'Test Conditions',
+                'Test Results',
+                'Performance Analysis',
+                'Graphs and Charts',
+                'Compliance Assessment',
+                'Conclusions and Recommendations',
+                'Appendices'
+            ],
+            'required_data': ['sample_id', 'test_method', 'test_date', 'results', 'technician', 'reviewer'],
+            'format': 'PDF'
+        },
+        {
+            'id': 'RT002',
+            'name': 'Equipment Performance Report',
+            'type': 'Equipment',
+            'sections': [
+                'Equipment Overview',
+                'Utilization Metrics',
+                'Performance Trends',
+                'Maintenance History',
+                'Calibration Status',
+                'Recommendations'
+            ],
+            'required_data': ['equipment_id', 'date_range', 'utilization', 'maintenance_records'],
+            'format': 'PDF/Excel'
+        },
+        {
+            'id': 'RT003',
+            'name': 'Manpower Utilization Report',
+            'type': 'Manpower',
+            'sections': [
+                'Staff Overview',
+                'Hours Distribution',
+                'Performance Metrics',
+                'Skill Utilization',
+                'Training Needs',
+                'Workload Balance'
+            ],
+            'required_data': ['date_range', 'staff_data', 'task_assignments'],
+            'format': 'Excel'
+        },
+        {
+            'id': 'RT004',
+            'name': 'Project Status Report',
+            'type': 'Project',
+            'sections': [
+                'Project Overview',
+                'Schedule Status (Gantt)',
+                'Task Progress (Kanban)',
+                'Resource Utilization',
+                'Risk Summary',
+                'KPIs and Metrics',
+                'Next Period Plan'
+            ],
+            'required_data': ['project_id', 'tasks', 'resources', 'risks'],
+            'format': 'PDF'
+        },
+        {
+            'id': 'RT005',
+            'name': 'IEC Compliance Report',
+            'type': 'Compliance',
+            'standard': 'IEC 61215/61730',
+            'sections': [
+                'Standards Overview',
+                'Test Matrix',
+                'Compliance Status by Test',
+                'Non-conformances',
+                'Corrective Actions',
+                'Final Compliance Statement'
+            ],
+            'required_data': ['sample_id', 'all_test_results', 'standards_requirements'],
+            'format': 'PDF'
+        }
+    ]
+
+    # Enhanced Equipment Data with more details
+    for eq in st.session_state.equipment:
+        if 'model' not in eq:
+            eq['model'] = f"Model-{eq['id'][-3:]}"
+        if 'serial_number' not in eq:
+            eq['serial_number'] = f"SN-{uuid.uuid4().hex[:8].upper()}"
+        if 'manufacturer' not in eq:
+            eq['manufacturer'] = 'SolarTest Inc.'
+        if 'tests_completed' not in eq:
+            eq['tests_completed'] = np.random.randint(50, 200)
+        if 'avg_test_time' not in eq:
+            eq['avg_test_time'] = np.random.uniform(1.5, 4.0)
+        if 'success_rate' not in eq:
+            eq['success_rate'] = np.random.uniform(95, 99.9)
+
+    # Enhanced Manpower Data
+    for emp in st.session_state.manpower:
+        if 'expertise_areas' not in emp:
+            emp['expertise_areas'] = emp['skills']
+        if 'tasks_completed' not in emp:
+            emp['tasks_completed'] = np.random.randint(20, 100)
+        if 'quality_score' not in emp:
+            emp['quality_score'] = emp['performance_score']
+        if 'speed_score' not in emp:
+            emp['speed_score'] = np.random.randint(85, 98)
+        if 'current_workload' not in emp:
+            emp['current_workload'] = np.random.randint(60, 95)
+        if 'capacity_hours' not in emp:
+            emp['capacity_hours'] = 40
+        if 'working_hours' not in emp:
+            emp['working_hours'] = '9:00 AM - 5:00 PM'
+
+    # Enhanced Samples with workflow states
+    for sample in st.session_state.samples:
+        if 'workflow_state' not in sample:
+            sample['workflow_state'] = 'Testing' if sample['status'] == 'In Testing' else 'Received'
+        if 'assigned_equipment' not in sample:
+            sample['assigned_equipment'] = 'EQP001' if sample['status'] == 'In Testing' else None
+        if 'assigned_technician' not in sample:
+            sample['assigned_technician'] = 'John Smith' if sample['status'] == 'In Testing' else None
+        if 'test_date' not in sample:
+            sample['test_date'] = datetime.now().date() if sample['status'] == 'In Testing' else None
+        if 'progress_percentage' not in sample:
+            sample['progress_percentage'] = 45 if sample['status'] == 'In Testing' else 0
+
+    # Performance Metrics
+    st.session_state.performance_metrics = [
+        {
+            'date': datetime.now().date() - timedelta(days=i),
+            'equipment_utilization': np.random.uniform(60, 90),
+            'staff_utilization': np.random.uniform(70, 95),
+            'tests_completed': np.random.randint(5, 15),
+            'avg_test_duration': np.random.uniform(2, 5)
+        } for i in range(30)
+    ]
+
 def add_audit_trail(action, entity_type, entity_id, details):
     """Add entry to audit trail"""
     st.session_state.audit_trail.append({
@@ -375,6 +643,163 @@ def create_notification(recipient, type, title, message, priority='Medium'):
         'timestamp': datetime.now(),
         'read': False
     })
+
+# Comprehensive Feature Helper Functions
+
+def generate_qr_code(data, size=10):
+    """Generate QR code for sample/equipment tracking"""
+    if HAS_QRCODE:
+        qr = qrcode.QRCode(version=1, box_size=size, border=2)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        # Convert to bytes
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        return buf
+    elif HAS_SEGNO:
+        qr = segno.make(data)
+        buf = BytesIO()
+        qr.save(buf, kind='png', scale=size)
+        buf.seek(0)
+        return buf
+    else:
+        # Fallback: create a simple text representation
+        return None
+
+def check_automation_rules():
+    """Check and trigger automation rules"""
+    triggered_rules = []
+
+    for rule in st.session_state.automation_rules:
+        if not rule['enabled']:
+            continue
+
+        # Check Overdue Test Alert
+        if rule['id'] == 'AR001':
+            for sample in st.session_state.samples:
+                if sample.get('test_date'):
+                    days_overdue = (datetime.now().date() - sample['test_date']).days
+                    if days_overdue > 2:
+                        triggered_rules.append({
+                            'rule': rule,
+                            'entity': sample,
+                            'message': f"Sample {sample['id']} test is {days_overdue} days overdue"
+                        })
+
+        # Check Calibration Due Warning
+        elif rule['id'] == 'AR002':
+            for equipment in st.session_state.equipment:
+                days_to_cal = (equipment['next_calibration'] - datetime.now().date()).days
+                if 0 < days_to_cal <= 30:
+                    triggered_rules.append({
+                        'rule': rule,
+                        'entity': equipment,
+                        'message': f"Equipment {equipment['name']} calibration due in {days_to_cal} days"
+                    })
+
+    # Create notifications for triggered rules
+    for trigger in triggered_rules:
+        for recipient in trigger['rule']['recipients']:
+            create_notification(
+                recipient=recipient,
+                type='Automation',
+                title=trigger['rule']['name'],
+                message=trigger['message'],
+                priority=trigger['rule']['priority']
+            )
+
+    return triggered_rules
+
+def validate_test_result(result_data, test_method):
+    """Validate test result against acceptance criteria"""
+    # Simple validation logic
+    validation_status = {
+        'valid': True,
+        'warnings': [],
+        'errors': []
+    }
+
+    # Check required fields
+    required_fields = ['sample_id', 'test_date', 'technician', 'results']
+    for field in required_fields:
+        if field not in result_data or not result_data[field]:
+            validation_status['valid'] = False
+            validation_status['errors'].append(f"Missing required field: {field}")
+
+    # Check if results meet acceptance criteria
+    if 'acceptance_criteria' in test_method and 'results' in result_data:
+        # This is a placeholder - real validation would parse criteria
+        if isinstance(result_data['results'], dict):
+            if 'pass' not in result_data['results']:
+                validation_status['warnings'].append("No pass/fail status in results")
+
+    return validation_status
+
+def calculate_wbs_rollup(tasks, parent_wbs):
+    """Calculate rollup values for WBS parent tasks"""
+    children = [t for t in tasks if t['wbs'].startswith(parent_wbs + '.') and t['wbs'].count('.') == parent_wbs.count('.') + 1]
+
+    if not children:
+        # Leaf node
+        parent_task = next((t for t in tasks if t['wbs'] == parent_wbs), None)
+        if parent_task:
+            return {
+                'duration': parent_task['duration'],
+                'progress': parent_task['progress'],
+                'status': parent_task['status']
+            }
+        return None
+
+    # Calculate rollup
+    total_duration = sum(c['duration'] for c in children)
+    weighted_progress = sum(c['duration'] * c['progress'] for c in children) / total_duration if total_duration > 0 else 0
+
+    # Status based on children
+    if all(c['status'] == 'Completed' for c in children):
+        status = 'Completed'
+    elif any(c['status'] == 'In Progress' for c in children):
+        status = 'In Progress'
+    else:
+        status = 'Not Started'
+
+    return {
+        'duration': total_duration,
+        'progress': weighted_progress,
+        'status': status
+    }
+
+def get_critical_path(tasks):
+    """Calculate critical path through tasks"""
+    # Simple critical path calculation based on dependencies and duration
+    critical_tasks = []
+
+    # Find tasks without successors (end tasks)
+    end_tasks = [t for t in tasks if not any(t['id'] in dep_task.get('dependencies', []) for dep_task in tasks)]
+
+    def find_longest_path(task, path=[]):
+        current_path = path + [task]
+        deps = task.get('dependencies', [])
+        if not deps:
+            return current_path
+
+        dep_tasks = [t for t in tasks if t['id'] in deps]
+        longest = current_path
+        for dep_task in dep_tasks:
+            path_through_dep = find_longest_path(dep_task, current_path)
+            if sum(t['duration'] for t in path_through_dep) > sum(t['duration'] for t in longest):
+                longest = path_through_dep
+        return longest
+
+    # Find the longest path
+    if end_tasks:
+        for end_task in end_tasks:
+            path = find_longest_path(end_task)
+            if sum(t['duration'] for t in path) > sum(t['duration'] for t in critical_tasks):
+                critical_tasks = path
+
+    return [t['id'] for t in critical_tasks]
 
 # Dashboard Functions
 def render_dashboard():
@@ -707,7 +1132,7 @@ def render_milestones():
                 hovertemplate=f"<b>{milestone['name']}</b><br>Date: {milestone['end_date']}<br>Status: {milestone['status']}"
             ))
         
-        fig.add_vline(x=str(datetime.now().date(), line_dash="dash", line_color="red", 
+        fig.add_vline(x=str(datetime.now().date()), line_dash="dash", line_color="red",
                      annotation_text="Today")
         
         fig.update_layout(
@@ -817,7 +1242,7 @@ def render_calendar_view():
     month_start = selected_date.replace(day=1)
     month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
     
-    month_events = [e for e in events if month_start <= datetime.strptime(e['start'], '%Y-%m-%d').date()(e['start'])).date() <= month_end]
+    month_events = [e for e in events if month_start <= datetime.strptime(e['start'], '%Y-%m-%d').date() <= month_end]
     
     # Display events
     st.write(f"### Events for {selected_date.strftime('%B %Y')}")
@@ -856,121 +1281,368 @@ def render_list_view():
         )
 
 def render_flowchart_view():
-    """Render flowchart view of process"""
-    st.subheader("Process Flowchart")
-    
-    # Create flowchart using plotly
-    fig = go.Figure()
-    
-    # Define process steps
-    steps = [
-        ("Start", 0, 0),
-        ("Sample Receipt", 1, 0),
-        ("Conditioning", 2, 0),
-        ("Testing", 3, 0),
-        ("Analysis", 4, 0),
-        ("Reporting", 5, 0),
-        ("Approval", 6, 0),
-        ("End", 7, 0)
-    ]
-    
-    # Add nodes
-    for step, x, y in steps:
-        fig.add_trace(go.Scatter(
-            x=[x], y=[y],
-            mode='markers+text',
-            marker=dict(size=40, color='lightblue', line=dict(color='blue', width=2)),
-            text=[step],
-            textposition='middle center',
-            showlegend=False
-        ))
-    
-    # Add edges
-    for i in range(len(steps)-1):
-        fig.add_trace(go.Scatter(
-            x=[steps[i][1], steps[i+1][1]],
-            y=[steps[i][2], steps[i+1][2]],
-            mode='lines',
-            line=dict(color='gray', width=2),
-            showlegend=False
-        ))
-        
-        # Add arrow annotation
-        fig.add_annotation(
-            x=steps[i+1][1],
-            y=steps[i+1][2],
-            ax=steps[i][1],
-            ay=steps[i][2],
-            xref="x",
-            yref="y",
-            axref="x",
-            ayref="y",
-            arrowhead=2,
-            arrowsize=1,
-            arrowwidth=2,
-            arrowcolor="gray"
+    """Enhanced flowchart view with project workflow visualization"""
+    st.subheader("📊 Project Workflow Flowchart")
+
+    # View selector
+    view_type = st.radio("Select View", ["Sample Testing Flow", "Project Workflow", "Approval Flow"], horizontal=True)
+
+    if view_type == "Sample Testing Flow":
+        # Enhanced sample testing flow
+        fig = go.Figure()
+
+        # Define process steps with status
+        steps = [
+            ("Start", 0, 2, "green"),
+            ("Sample\nReceipt", 1, 2, "green"),
+            ("Conditioning", 2, 2, "orange"),
+            ("Testing", 3, 2, "orange"),
+            ("Analysis", 4, 2, "blue"),
+            ("Reporting", 5, 2, "blue"),
+            ("Approval", 6, 2, "blue"),
+            ("End", 7, 2, "green")
+        ]
+
+        # Add nodes with colors
+        for step, x, y, color in steps:
+            fig.add_trace(go.Scatter(
+                x=[x], y=[y],
+                mode='markers+text',
+                marker=dict(size=60, color=color, line=dict(color='white', width=3), opacity=0.8),
+                text=[step],
+                textposition='middle center',
+                textfont=dict(size=10, color='white', family='Arial Black'),
+                hovertemplate=f'<b>{step}</b><br>Click for details<extra></extra>',
+                showlegend=False
+            ))
+
+        # Add edges with arrows
+        for i in range(len(steps)-1):
+            fig.add_trace(go.Scatter(
+                x=[steps[i][1], steps[i+1][1]],
+                y=[steps[i][2], steps[i+1][2]],
+                mode='lines',
+                line=dict(color='gray', width=3),
+                showlegend=False,
+                hoverinfo='skip'
+            ))
+
+            # Arrow annotations
+            fig.add_annotation(
+                x=steps[i+1][1],
+                y=steps[i+1][2],
+                ax=steps[i][1],
+                ay=steps[i][2],
+                xref="x", yref="y",
+                axref="x", ayref="y",
+                arrowhead=2,
+                arrowsize=1.5,
+                arrowwidth=2,
+                arrowcolor="gray",
+                showarrow=True
+            )
+
+        fig.update_layout(
+            title="Sample Testing Process Flow",
+            showlegend=False,
+            height=400,
+            xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+            yaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[0, 4]),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='white'
         )
-    
-    fig.update_layout(
-        title="Testing Process Flow",
-        showlegend=False,
-        height=400,
-        xaxis=dict(showticklabels=False, showgrid=False),
-        yaxis=dict(showticklabels=False, showgrid=False, range=[-1, 1])
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    elif view_type == "Project Workflow":
+        # Multi-level project workflow
+        fig = go.Figure()
+
+        # Define hierarchical workflow
+        nodes = [
+            # Level 1 - Project
+            ("Project\nInitiation", 3, 4, "purple", 70),
+            # Level 2 - Tasks
+            ("Task\nPlanning", 1, 3, "blue", 50),
+            ("Resource\nAllocation", 3, 3, "blue", 50),
+            ("Schedule\nSetup", 5, 3, "blue", 50),
+            # Level 3 - Execution
+            ("Test\nExecution", 1, 2, "orange", 50),
+            ("Quality\nCheck", 3, 2, "orange", 50),
+            ("Progress\nTracking", 5, 2, "orange", 50),
+            # Level 4 - Approval
+            ("Technical\nApproval", 2, 1, "green", 50),
+            ("Manager\nApproval", 4, 1, "green", 50),
+            # Level 5 - Report
+            ("Final\nReport", 3, 0, "darkgreen", 60)
+        ]
+
+        # Add nodes
+        for step, x, y, color, size in nodes:
+            fig.add_trace(go.Scatter(
+                x=[x], y=[y],
+                mode='markers+text',
+                marker=dict(size=size, color=color, line=dict(color='white', width=2), opacity=0.9),
+                text=[step],
+                textposition='middle center',
+                textfont=dict(size=9, color='white', family='Arial Black'),
+                hovertemplate=f'<b>{step}</b><extra></extra>',
+                showlegend=False
+            ))
+
+        # Define connections
+        connections = [
+            (0, 1), (0, 2), (0, 3),  # Project to tasks
+            (1, 4), (2, 5), (3, 6),  # Tasks to execution
+            (4, 7), (5, 7), (6, 8),  # Execution to approval
+            (7, 9), (8, 9)            # Approval to report
+        ]
+
+        # Add edges
+        for start, end in connections:
+            fig.add_trace(go.Scatter(
+                x=[nodes[start][1], nodes[end][1]],
+                y=[nodes[start][2], nodes[end][2]],
+                mode='lines',
+                line=dict(color='gray', width=2, dash='dot'),
+                showlegend=False,
+                hoverinfo='skip'
+            ))
+
+        fig.update_layout(
+            title="Complete Project Workflow",
+            showlegend=False,
+            height=500,
+            xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.5, 6.5]),
+            yaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.5, 4.5]),
+            plot_bgcolor='rgba(240,240,240,0.5)',
+            paper_bgcolor='white'
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    else:  # Approval Flow
+        # Multi-level approval workflow
+        st.markdown("### Multi-Level Approval Workflow")
+
+        fig = go.Figure()
+
+        # Approval levels
+        levels = [
+            ("Technician\nEntry", 0, 3, "lightblue"),
+            ("QA\nReview", 1, 3, "orange"),
+            ("Manager\nApproval", 2, 3, "yellow"),
+            ("Director\nSign-off", 3, 3, "green")
+        ]
+
+        # Decision points
+        decisions = [
+            ("Pass?", 0.5, 2, "lightgray"),
+            ("Pass?", 1.5, 2, "lightgray"),
+            ("Pass?", 2.5, 2, "lightgray")
+        ]
+
+        # Add approval level nodes
+        for step, x, y, color in levels:
+            fig.add_trace(go.Scatter(
+                x=[x], y=[y],
+                mode='markers+text',
+                marker=dict(size=70, color=color, line=dict(color='black', width=2), opacity=0.8),
+                text=[step],
+                textposition='middle center',
+                textfont=dict(size=10, color='black', family='Arial'),
+                showlegend=False
+            ))
+
+        # Add decision nodes
+        for step, x, y, color in decisions:
+            fig.add_trace(go.Scatter(
+                x=[x], y=[y],
+                mode='markers+text',
+                marker=dict(size=40, color=color, symbol='diamond', line=dict(color='red', width=2)),
+                text=[step],
+                textposition='middle center',
+                textfont=dict(size=9, color='red', family='Arial Bold'),
+                showlegend=False
+            ))
+
+        # Add connections
+        for i in range(len(levels)-1):
+            # To decision
+            fig.add_trace(go.Scatter(
+                x=[levels[i][1], decisions[i][1]],
+                y=[levels[i][2], decisions[i][2]],
+                mode='lines',
+                line=dict(color='blue', width=2),
+                showlegend=False
+            ))
+            # From decision to next level
+            fig.add_trace(go.Scatter(
+                x=[decisions[i][1], levels[i+1][1]],
+                y=[decisions[i][2], levels[i+1][2]],
+                mode='lines',
+                line=dict(color='green', width=2),
+                showlegend=False
+            ))
+
+        fig.update_layout(
+            title="Multi-Level Approval Flow",
+            showlegend=False,
+            height=400,
+            xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.5, 3.5]),
+            yaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[1, 4]),
+            plot_bgcolor='rgba(250,250,250,0.8)',
+            paper_bgcolor='white'
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Show approval levels table
+        st.markdown("### Approval Levels")
+        if st.session_state.approval_levels:
+            df = pd.DataFrame(st.session_state.approval_levels)
+            st.dataframe(df, use_container_width=True)
 
 def render_route_card_view():
-    """Render route card view for samples"""
-    st.subheader("Sample Route Cards")
-    
-    if st.session_state.samples:
-        selected_sample = st.selectbox("Select Sample", [s['name'] for s in st.session_state.samples])
-        sample = next((s for s in st.session_state.samples if s['name'] == selected_sample), None)
-        
-        if sample:
-            # Route card display
-            st.markdown("### 📋 Route Card")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.write(f"**Sample ID:** {sample['id']}")
-                st.write(f"**Name:** {sample['name']}")
-                st.write(f"**Type:** {sample['type']}")
-                st.write(f"**Batch:** {sample['batch']}")
-                st.write(f"**Barcode:** {sample['barcode']}")
-            
-            with col2:
-                st.write(f"**Status:** {sample['status']}")
-                st.write(f"**Location:** {sample['location']}")
-                st.write(f"**Condition:** {sample['condition']}")
-                st.write(f"**Test Status:** {sample['test_status']}")
-            
-            # Chain of custody
-            st.markdown("### 🔗 Chain of Custody")
-            for entry in sample['chain_of_custody']:
-                st.info(f"📅 {entry['date'].strftime('%Y-%m-%d %H:%M')} - From: {entry['from']} → To: {entry['to']} | Handler: {entry['handler']} | Notes: {entry['notes']}")
-            
-            # Add transfer
-            with st.expander("Add Transfer"):
-                with st.form("transfer_form"):
-                    new_location = st.text_input("New Location")
-                    handler = st.selectbox("Handler", [m['name'] for m in st.session_state.manpower])
-                    notes = st.text_area("Notes")
-                    
-                    if st.form_submit_button("Add Transfer"):
-                        sample['chain_of_custody'].append({
-                            'date': datetime.now(),
-                            'from': sample['location'],
-                            'to': new_location,
-                            'handler': handler,
-                            'notes': notes
-                        })
-                        sample['location'] = new_location
-                        st.success("Transfer recorded successfully!")
-                        st.rerun()
+    """Enhanced route card view with visual cards and filters"""
+    st.subheader("📋 Sample Route Cards")
+
+    # Filters
+    st.markdown("### Filters")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        filter_status = st.multiselect("Status", ["Available", "In Testing", "Completed", "Archived"], key="rc_status")
+    with col2:
+        filter_workflow = st.multiselect("Workflow State", st.session_state.sample_workflow_states, key="rc_workflow")
+    with col3:
+        filter_equipment = st.multiselect("Equipment", list(set([s.get('assigned_equipment') for s in st.session_state.samples if s.get('assigned_equipment')])), key="rc_equip")
+    with col4:
+        filter_technician = st.multiselect("Technician", [m['name'] for m in st.session_state.manpower], key="rc_tech")
+
+    # Apply filters
+    filtered_samples = st.session_state.samples
+    if filter_status:
+        filtered_samples = [s for s in filtered_samples if s['status'] in filter_status]
+    if filter_workflow:
+        filtered_samples = [s for s in filtered_samples if s.get('workflow_state') in filter_workflow]
+    if filter_equipment:
+        filtered_samples = [s for s in filtered_samples if s.get('assigned_equipment') in filter_equipment]
+    if filter_technician:
+        filtered_samples = [s for s in filtered_samples if s.get('assigned_technician') in filter_technician]
+
+    st.markdown("---")
+
+    # Visual cards display
+    if filtered_samples:
+        # Group by workflow state
+        workflow_cols = st.columns(min(len(st.session_state.sample_workflow_states), 4))
+
+        for idx, state in enumerate(st.session_state.sample_workflow_states[:4]):
+            with workflow_cols[idx]:
+                st.markdown(f"### {state}")
+                state_samples = [s for s in filtered_samples if s.get('workflow_state') == state]
+
+                if not state_samples:
+                    st.info("No samples")
+                else:
+                    for sample in state_samples:
+                        # Color based on status
+                        if sample['status'] == 'Available':
+                            border_color = '#00aa00'
+                        elif sample['status'] == 'In Testing':
+                            border_color = '#ffaa00'
+                        else:
+                            border_color = '#0088ff'
+
+                        card_html = f"""
+                        <div style="
+                            border-left: 5px solid {border_color};
+                            background-color: #f9f9f9;
+                            padding: 10px;
+                            border-radius: 5px;
+                            margin-bottom: 10px;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        ">
+                            <h4 style="margin: 0 0 5px 0; color: #333;">{sample['id']}</h4>
+                            <p style="margin: 0; font-size: 14px; color: #666;">
+                                <strong>{sample['name']}</strong><br/>
+                                Status: {sample['status']}<br/>
+                                Stage: {sample.get('workflow_state', 'Unknown')}<br/>
+                                Progress: {sample.get('progress_percentage', 0)}%<br/>
+                            </p>
+                        </div>
+                        """
+                        st.markdown(card_html, unsafe_allow_html=True)
+
+                        # Card details in expander
+                        with st.expander(f"Details: {sample['id']}"):
+                            st.write(f"**Type:** {sample['type']}")
+                            st.write(f"**Batch:** {sample['batch']}")
+                            st.write(f"**Location:** {sample['location']}")
+                            st.write(f"**Test Status:** {sample['test_status']}")
+                            if sample.get('assigned_technician'):
+                                st.write(f"**Technician:** {sample['assigned_technician']}")
+                            if sample.get('assigned_equipment'):
+                                st.write(f"**Equipment:** {sample['assigned_equipment']}")
+
+                            # Timeline visualization
+                            st.markdown("**Timeline:**")
+                            for entry in sample['chain_of_custody']:
+                                st.caption(f"📍 {entry['date'].strftime('%Y-%m-%d %H:%M')} - {entry['to']}")
+
+        # Additional workflow states if more than 4
+        if len(st.session_state.sample_workflow_states) > 4:
+            st.markdown("---")
+            workflow_cols2 = st.columns(min(len(st.session_state.sample_workflow_states[4:]), 3))
+            for idx, state in enumerate(st.session_state.sample_workflow_states[4:]):
+                with workflow_cols2[idx]:
+                    st.markdown(f"### {state}")
+                    state_samples = [s for s in filtered_samples if s.get('workflow_state') == state]
+
+                    if not state_samples:
+                        st.info("No samples")
+                    else:
+                        for sample in state_samples:
+                            border_color = '#888888' if sample['status'] == 'Archived' else '#00aa00'
+                            card_html = f"""
+                            <div style="
+                                border-left: 5px solid {border_color};
+                                background-color: #f9f9f9;
+                                padding: 10px;
+                                border-radius: 5px;
+                                margin-bottom: 10px;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            ">
+                                <h4 style="margin: 0 0 5px 0; color: #333;">{sample['id']}</h4>
+                                <p style="margin: 0; font-size: 14px; color: #666;">
+                                    <strong>{sample['name']}</strong><br/>
+                                    Status: {sample['status']}<br/>
+                                    Progress: {sample.get('progress_percentage', 0)}%
+                                </p>
+                            </div>
+                            """
+                            st.markdown(card_html, unsafe_allow_html=True)
+
+    else:
+        st.info("No samples match the selected filters")
+
+    # Drag-drop simulation (status update)
+    st.markdown("---")
+    st.markdown("### Quick Status Update")
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        update_sample = st.selectbox("Select Sample", [s['id'] + ' - ' + s['name'] for s in st.session_state.samples], key="rc_update_sample")
+    with col_b:
+        new_workflow_state = st.selectbox("Move to State", st.session_state.sample_workflow_states, key="rc_new_state")
+    with col_c:
+        if st.button("Update Sample Status", key="rc_update_btn"):
+            sample_id = update_sample.split(' - ')[0]
+            sample = next((s for s in st.session_state.samples if s['id'] == sample_id), None)
+            if sample:
+                sample['workflow_state'] = new_workflow_state
+                add_audit_trail('Updated', 'Sample', sample['id'], f"Workflow state changed to {new_workflow_state}")
+                st.success(f"✅ Updated {sample_id} to {new_workflow_state}")
+                st.rerun()
 
 # Solar Testing Management
 def render_solar_testing():
@@ -995,33 +1667,108 @@ def render_solar_testing():
         render_results_entry()
 
 def render_sample_tracking():
-    """Render sample tracking with chain of custody"""
-    st.subheader("Sample Tracking & Chain of Custody")
-    
-    # Display samples
+    """Enhanced sample tracking with QR codes and workflow"""
+    st.subheader("📦 Sample Tracking & Chain of Custody")
+
+    # Sample workflow visualization
+    st.markdown("### Sample Workflow States")
+    workflow_states = st.session_state.sample_workflow_states
+    cols = st.columns(len(workflow_states))
+    for i, state in enumerate(workflow_states):
+        count = len([s for s in st.session_state.samples if s.get('workflow_state') == state])
+        cols[i].metric(state, count)
+
+    st.markdown("---")
+
+    # Display samples with enhanced info
     if st.session_state.samples:
-        df = pd.DataFrame(st.session_state.samples)
-        st.dataframe(df[['id', 'name', 'type', 'batch', 'status', 'location', 'test_status']], use_container_width=True)
-    
+        for sample in st.session_state.samples:
+            with st.expander(f"🔬 {sample['id']} - {sample['name']} | {sample.get('workflow_state', 'Unknown')}"):
+                col1, col2, col3 = st.columns([2, 2, 1])
+
+                with col1:
+                    st.write(f"**Type:** {sample['type']}")
+                    st.write(f"**Batch:** {sample['batch']}")
+                    st.write(f"**Status:** {sample['status']}")
+                    st.write(f"**Location:** {sample['location']}")
+                    st.write(f"**Condition:** {sample['condition']}")
+
+                with col2:
+                    st.write(f"**Workflow State:** {sample.get('workflow_state', 'Unknown')}")
+                    st.write(f"**Test Status:** {sample['test_status']}")
+                    if sample.get('assigned_technician'):
+                        st.write(f"**Assigned To:** {sample['assigned_technician']}")
+                    if sample.get('assigned_equipment'):
+                        st.write(f"**Equipment:** {sample['assigned_equipment']}")
+                    if sample.get('progress_percentage'):
+                        st.progress(sample['progress_percentage'] / 100.0)
+                        st.write(f"Progress: {sample['progress_percentage']}%")
+
+                with col3:
+                    # QR Code generation
+                    st.markdown("**QR Code:**")
+                    qr_data = f"SAMPLE:{sample['id']}|{sample['name']}|{sample['batch']}"
+                    qr_buf = generate_qr_code(qr_data, size=5)
+                    if qr_buf:
+                        st.image(qr_buf, width=150)
+                    else:
+                        st.code(sample['barcode'], language=None)
+
+                # Chain of Custody
+                st.markdown("**🔗 Chain of Custody:**")
+                for entry in sample['chain_of_custody']:
+                    st.info(f"📅 {entry['date'].strftime('%Y-%m-%d %H:%M')} | {entry['from']} → {entry['to']} | Handler: {entry['handler']} | {entry['notes']}")
+
+                # Workflow actions
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    new_state = st.selectbox(f"Update Workflow State ({sample['id']})", workflow_states, key=f"state_{sample['id']}")
+                    if st.button(f"Update State", key=f"btn_state_{sample['id']}"):
+                        sample['workflow_state'] = new_state
+                        add_audit_trail('Updated', 'Sample', sample['id'], f"Workflow state changed to {new_state}")
+                        st.success(f"Updated to {new_state}")
+                        st.rerun()
+
+                with col_b:
+                    new_location = st.text_input(f"Transfer to Location ({sample['id']})", key=f"loc_{sample['id']}")
+                    handler = st.selectbox(f"Handler", [m['name'] for m in st.session_state.manpower], key=f"handler_{sample['id']}")
+                    if st.button(f"Transfer", key=f"btn_transfer_{sample['id']}"):
+                        if new_location:
+                            sample['chain_of_custody'].append({
+                                'date': datetime.now(),
+                                'from': sample['location'],
+                                'to': new_location,
+                                'handler': handler,
+                                'notes': 'Location transfer'
+                            })
+                            sample['location'] = new_location
+                            add_audit_trail('Transferred', 'Sample', sample['id'], f"Transferred to {new_location}")
+                            st.success("Transfer recorded")
+                            st.rerun()
+
     # Add new sample
-    with st.expander("Add New Sample"):
+    st.markdown("---")
+    with st.expander("➕ Add New Sample"):
         with st.form("add_sample_form"):
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 sample_name = st.text_input("Sample Name")
                 sample_type = st.selectbox("Type", ["Monocrystalline", "Polycrystalline", "Thin Film", "Bifacial"])
                 batch = st.text_input("Batch Number")
-                barcode = st.text_input("Barcode")
-            
+                barcode = st.text_input("Barcode (auto-generated if blank)")
+
             with col2:
                 condition = st.selectbox("Condition", ["Good", "Minor Damage", "Major Damage"])
-                location = st.text_input("Initial Location")
+                location = st.text_input("Initial Location", value="Lab Storage A")
                 received_by = st.selectbox("Received By", [m['name'] for m in st.session_state.manpower])
-            
+
             if st.form_submit_button("Add Sample"):
+                new_id = f'SMP{len(st.session_state.samples)+1:03d}'
+                new_barcode = barcode if barcode else f'BC{uuid.uuid4().hex[:9].upper()}'
+
                 new_sample = {
-                    'id': f'SMP{len(st.session_state.samples)+1:03d}',
+                    'id': new_id,
                     'name': sample_name,
                     'type': sample_type,
                     'batch': batch,
@@ -1034,11 +1781,17 @@ def render_sample_tracking():
                     ],
                     'status': 'Available',
                     'test_status': 'Pending',
-                    'barcode': barcode
+                    'barcode': new_barcode,
+                    'workflow_state': 'Created',
+                    'assigned_equipment': None,
+                    'assigned_technician': None,
+                    'test_date': None,
+                    'progress_percentage': 0
                 }
                 st.session_state.samples.append(new_sample)
                 add_audit_trail('Created', 'Sample', new_sample['id'], f"Added sample {sample_name}")
-                st.success(f"Sample {sample_name} added successfully!")
+                create_notification(received_by, 'Sample', 'New Sample Received', f"Sample {new_id} - {sample_name} has been received", 'Medium')
+                st.success(f"Sample {sample_name} added successfully with ID {new_id}!")
                 st.rerun()
 
 def render_equipment_management():
@@ -1091,57 +1844,155 @@ def render_equipment_management():
         st.plotly_chart(fig, use_container_width=True)
 
 def render_test_methods():
-    """Render test methods management"""
-    st.subheader("Test Methods & Standards")
-    
-    # Display test methods
-    for method in st.session_state.test_methods:
-        with st.expander(f"{method['name']} ({method['method_number']})"):
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.write(f"**Standard:** {method['standard']}")
-                st.write(f"**Category:** {method['category']}")
-                st.write(f"**Duration:** {method['duration_hours']} hours")
-            
-            with col2:
-                st.write(f"**Equipment Required:** {', '.join(method['equipment_required'])}")
-                st.write(f"**Parameters:** {', '.join(method['parameters'])}")
-                st.write(f"**Acceptance Criteria:** {method['acceptance_criteria']}")
-    
-    # Add new test method
-    with st.expander("Add New Test Method"):
-        with st.form("add_test_method_form"):
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                method_name = st.text_input("Method Name")
-                standard = st.text_input("Standard (e.g., IEC 61215)")
-                method_number = st.text_input("Method Number")
-                category = st.selectbox("Category", ["Electrical Performance", "Environmental Testing", 
-                                                    "Mechanical Testing", "Safety Testing"])
-            
-            with col2:
-                duration = st.number_input("Duration (hours)", min_value=1)
-                equipment = st.multiselect("Equipment Required", [e['name'] for e in st.session_state.equipment])
-                parameters = st.text_input("Parameters (comma-separated)")
-                criteria = st.text_area("Acceptance Criteria")
-            
-            if st.form_submit_button("Add Test Method"):
-                new_method = {
-                    'id': f'TM{len(st.session_state.test_methods)+1:03d}',
-                    'name': method_name,
-                    'standard': standard,
-                    'method_number': method_number,
-                    'category': category,
-                    'equipment_required': equipment,
-                    'duration_hours': duration,
-                    'parameters': [p.strip() for p in parameters.split(',')],
-                    'acceptance_criteria': criteria
-                }
-                st.session_state.test_methods.append(new_method)
-                st.success(f"Test method {method_name} added successfully!")
-                st.rerun()
+    """Enhanced test methods with protocol templates"""
+    st.subheader("📋 Test Methods & Protocol Templates")
+
+    # Tab view for methods and protocols
+    method_tabs = st.tabs(["Test Methods", "Protocol Templates", "Operator Entry"])
+
+    with method_tabs[0]:
+        # Display test methods
+        st.markdown("### Available Test Methods")
+        for method in st.session_state.test_methods:
+            with st.expander(f"⚡ {method['name']} ({method['method_number']})"):
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.write(f"**Standard:** {method['standard']}")
+                    st.write(f"**Category:** {method['category']}")
+                    st.write(f"**Duration:** {method['duration_hours']} hours")
+
+                with col2:
+                    st.write(f"**Equipment Required:** {', '.join(method['equipment_required'])}")
+                    st.write(f"**Parameters:** {', '.join(method['parameters'])}")
+                    st.write(f"**Acceptance Criteria:** {method['acceptance_criteria']}")
+
+        # Add new test method
+        with st.expander("➕ Add New Test Method"):
+            with st.form("add_test_method_form"):
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    method_name = st.text_input("Method Name")
+                    standard = st.text_input("Standard (e.g., IEC 61215)")
+                    method_number = st.text_input("Method Number")
+                    category = st.selectbox("Category", ["Electrical Performance", "Environmental Testing",
+                                                        "Mechanical Testing", "Safety Testing"])
+
+                with col2:
+                    duration = st.number_input("Duration (hours)", min_value=1)
+                    equipment = st.multiselect("Equipment Required", [e['name'] for e in st.session_state.equipment])
+                    parameters = st.text_input("Parameters (comma-separated)")
+                    criteria = st.text_area("Acceptance Criteria")
+
+                if st.form_submit_button("Add Test Method"):
+                    new_method = {
+                        'id': f'TM{len(st.session_state.test_methods)+1:03d}',
+                        'name': method_name,
+                        'standard': standard,
+                        'method_number': method_number,
+                        'category': category,
+                        'equipment_required': equipment,
+                        'duration_hours': duration,
+                        'parameters': [p.strip() for p in parameters.split(',')],
+                        'acceptance_criteria': criteria
+                    }
+                    st.session_state.test_methods.append(new_method)
+                    add_audit_trail('Created', 'Test Method', new_method['id'], f"Added test method {method_name}")
+                    st.success(f"Test method {method_name} added successfully!")
+                    st.rerun()
+
+    with method_tabs[1]:
+        # Protocol Templates
+        st.markdown("### Detailed Protocol Templates")
+
+        for protocol in st.session_state.test_protocols:
+            with st.expander(f"📄 {protocol['name']} (v{protocol['version']})"):
+                st.write(f"**Test Method ID:** {protocol['test_method_id']}")
+
+                st.markdown("#### Protocol Steps")
+                for step in protocol['steps']:
+                    st.markdown(f"**Step {step['step']}:** {step['instruction']}")
+                    col_a, col_b = st.columns(2)
+                    with col_a:
+                        st.caption(f"Expected: {step['expected_result']}")
+                    with col_b:
+                        st.caption(f"Acceptance: {step['acceptance']}")
+                    st.markdown("---")
+
+                st.info(f"**Safety Notes:** {protocol['safety_notes']}")
+                st.success(f"**Pass Criteria:** {protocol['pass_criteria']}")
+                st.write(f"**Equipment Setup:** {protocol['equipment_setup']}")
+
+    with method_tabs[2]:
+        # Operator Entry Sheet
+        st.markdown("### Operator Entry Sheet")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            selected_protocol = st.selectbox("Select Protocol",
+                                           [p['name'] for p in st.session_state.test_protocols])
+            selected_sample = st.selectbox("Select Sample",
+                                         [s['id'] + ' - ' + s['name'] for s in st.session_state.samples])
+
+        with col2:
+            operator = st.selectbox("Operator", [m['name'] for m in st.session_state.manpower])
+            test_date = st.date_input("Test Date", value=datetime.now().date())
+
+        if selected_protocol:
+            protocol = next((p for p in st.session_state.test_protocols if p['name'] == selected_protocol), None)
+
+            if protocol:
+                st.markdown(f"### {protocol['name']}")
+                st.caption(f"Version: {protocol['version']} | Standard: {protocol.get('standard', 'N/A')}")
+
+                with st.form("operator_entry_form"):
+                    st.markdown("#### Step-by-Step Execution")
+
+                    step_results = []
+                    for step in protocol['steps']:
+                        st.markdown(f"**Step {step['step']}: {step['instruction']}**")
+                        col_a, col_b, col_c = st.columns([3, 1, 1])
+
+                        with col_a:
+                            observation = st.text_input(f"Observation (Step {step['step']})",
+                                                       key=f"obs_{step['step']}")
+                        with col_b:
+                            pass_fail = st.selectbox(f"Result",
+                                                    ["Pass", "Fail", "N/A"],
+                                                    key=f"result_{step['step']}")
+                        with col_c:
+                            st.caption(f"Expected: {step['expected_result']}")
+
+                        step_results.append({
+                            'step': step['step'],
+                            'observation': observation,
+                            'result': pass_fail
+                        })
+
+                    st.markdown("#### Overall Test Notes")
+                    overall_notes = st.text_area("Additional Notes", height=100)
+                    final_result = st.selectbox("Final Test Result", ["Pass", "Fail", "Conditional Pass"])
+
+                    if st.form_submit_button("Submit Test Results"):
+                        sample_id = selected_sample.split(' - ')[0]
+                        result_record = {
+                            'id': str(uuid.uuid4()),
+                            'protocol_id': protocol['id'],
+                            'sample_id': sample_id,
+                            'operator': operator,
+                            'test_date': test_date,
+                            'step_results': step_results,
+                            'overall_notes': overall_notes,
+                            'final_result': final_result,
+                            'submitted_at': datetime.now()
+                        }
+
+                        st.session_state.test_results.append(result_record)
+                        add_audit_trail('Submitted', 'Test Result', result_record['id'],
+                                      f"Test results submitted for {sample_id}")
+                        st.success(f"✅ Test results submitted successfully! Result ID: {result_record['id'][:8]}")
+                        st.rerun()
 
 def render_test_execution():
     """Render test execution interface"""
@@ -1512,21 +2363,24 @@ def render_escalations():
 
 # Resource Management
 def render_resources():
-    """Render resource management interface"""
+    """Enhanced resource management interface"""
     st.header("👥 Resource Management")
-    
-    tabs = st.tabs(["Manpower", "Equipment Booking", "Holiday Planning", "Performance Metrics"])
-    
+
+    tabs = st.tabs(["Advanced Equipment", "Advanced Manpower", "Equipment Booking", "Holiday Planning", "Performance Metrics"])
+
     with tabs[0]:
-        render_manpower_management()
-    
+        render_advanced_equipment_management()
+
     with tabs[1]:
-        render_equipment_booking()
-    
+        render_advanced_manpower_management()
+
     with tabs[2]:
-        render_holiday_planning()
-    
+        render_equipment_booking()
+
     with tabs[3]:
+        render_holiday_planning()
+
+    with tabs[4]:
         render_performance_metrics()
 
 def render_manpower_management():
@@ -2039,9 +2893,470 @@ def render_reports():
     
     with tabs[2]:
         render_audit_trail()
-    
+
     with tabs[3]:
         render_export_data()
+
+# ===== COMPREHENSIVE FEATURE ENHANCEMENTS =====
+
+def render_advanced_equipment_management():
+    """Advanced Equipment Management with Registry, Performance, and Maintenance"""
+    st.subheader("🔧 Advanced Equipment Management")
+
+    tabs = st.tabs(["Equipment Registry", "Performance Metrics", "Maintenance Logs", "Availability Calendar", "Alerts"])
+
+    with tabs[0]:
+        # Equipment Registry
+        st.markdown("### Equipment Registry")
+        for eq in st.session_state.equipment:
+            with st.expander(f"{eq['name']} - {eq.get('model', 'N/A')}"):
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.write(f"**ID:** {eq['id']}")
+                    st.write(f"**Type:** {eq['type']}")
+                    st.write(f"**Model:** {eq.get('model', 'N/A')}")
+                    st.write(f"**Serial:** {eq.get('serial_number', 'N/A')}")
+
+                with col2:
+                    st.write(f"**Status:** {eq['status']}")
+                    st.write(f"**Location:** {eq['location']}")
+                    st.write(f"**Manufacturer:** {eq.get('manufacturer', 'N/A')}")
+
+                with col3:
+                    st.metric("Performance", f"{eq['performance_metric']:.1f}%")
+                    st.metric("Utilization", f"{eq['utilization']}%")
+                    st.metric("Tests Completed", eq.get('tests_completed', 0))
+
+    with tabs[1]:
+        # Performance Metrics
+        st.markdown("### Equipment Performance Metrics")
+
+        metrics_df = pd.DataFrame([
+            {
+                'Equipment': eq['name'],
+                'Tests Completed': eq.get('tests_completed', 0),
+                'Avg Test Time (h)': round(eq.get('avg_test_time', 0), 2),
+                'Success Rate (%)': round(eq.get('success_rate', 0), 1),
+                'Performance': eq['performance_metric']
+            }
+            for eq in st.session_state.equipment
+        ])
+
+        st.dataframe(metrics_df, use_container_width=True)
+
+        # Performance chart
+        fig = make_subplots(
+            rows=1, cols=2,
+            subplot_titles=('Tests Completed', 'Success Rate vs Performance')
+        )
+
+        fig.add_trace(
+            go.Bar(x=metrics_df['Equipment'], y=metrics_df['Tests Completed'], name='Tests'),
+            row=1, col=1
+        )
+
+        fig.add_trace(
+            go.Scatter(x=metrics_df['Success Rate (%)'], y=metrics_df['Performance'],
+                      mode='markers+text', text=metrics_df['Equipment'],
+                      textposition='top center', name='Equipment',
+                      marker=dict(size=12)),
+            row=1, col=2
+        )
+
+        fig.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
+
+    with tabs[2]:
+        # Maintenance Logs
+        st.markdown("### Maintenance & Calibration Logs")
+
+        for eq in st.session_state.equipment:
+            with st.expander(f"{eq['name']} - Maintenance History"):
+                st.write(f"**Last Calibration:** {eq['last_calibration']}")
+                st.write(f"**Next Calibration:** {eq['next_calibration']}")
+
+                days_remaining = (eq['next_calibration'] - datetime.now().date()).days
+                if days_remaining < 30:
+                    st.warning(f"⚠️ Calibration due in {days_remaining} days")
+                else:
+                    st.success(f"✅ {days_remaining} days until calibration")
+
+                if eq.get('maintenance_history'):
+                    st.markdown("**Maintenance History:**")
+                    for entry in eq['maintenance_history']:
+                        st.info(f"📅 {entry['date']} | {entry['type']} | {entry['technician']} | {entry['notes']}")
+
+                # Add maintenance record
+                with st.form(f"add_maintenance_{eq['id']}"):
+                    maint_type = st.selectbox("Type", ["Calibration", "Repair", "Preventive Maintenance", "Inspection"])
+                    technician = st.selectbox("Technician", [m['name'] for m in st.session_state.manpower])
+                    notes = st.text_area("Notes")
+
+                    if st.form_submit_button("Add Maintenance Record"):
+                        if 'maintenance_history' not in eq:
+                            eq['maintenance_history'] = []
+                        eq['maintenance_history'].append({
+                            'date': datetime.now().date(),
+                            'type': maint_type,
+                            'technician': technician,
+                            'notes': notes
+                        })
+                        if maint_type == "Calibration":
+                            eq['last_calibration'] = datetime.now().date()
+                            eq['next_calibration'] = datetime.now().date() + timedelta(days=365)
+                        st.success("Maintenance record added!")
+                        st.rerun()
+
+    with tabs[3]:
+        # Availability Calendar
+        st.markdown("### Equipment Availability Calendar")
+
+        selected_eq = st.selectbox("Select Equipment", [e['name'] for e in st.session_state.equipment])
+        equipment = next((e for e in st.session_state.equipment if e['name'] == selected_eq), None)
+
+        if equipment:
+            st.write(f"**Status:** {equipment['status']}")
+            st.write(f"**Current Utilization:** {equipment['utilization']}%")
+
+            # Show bookings
+            if equipment.get('bookings'):
+                st.markdown("**Current Bookings:**")
+                for booking in equipment['bookings']:
+                    st.info(f"📅 {booking['date']} | {booking['user']} | Project: {booking['project']} | Duration: {booking['duration']}h")
+            else:
+                st.success("No current bookings")
+
+            # Add booking
+            with st.form(f"add_booking_{equipment['id']}"):
+                booking_date = st.date_input("Date", value=datetime.now().date())
+                user = st.selectbox("User", [m['name'] for m in st.session_state.manpower])
+                project = st.selectbox("Project", [p['id'] + ' - ' + p['name'] for p in st.session_state.projects])
+                duration = st.number_input("Duration (hours)", min_value=1, max_value=24, value=4)
+
+                if st.form_submit_button("Book Equipment"):
+                    if 'bookings' not in equipment:
+                        equipment['bookings'] = []
+                    equipment['bookings'].append({
+                        'date': booking_date,
+                        'user': user,
+                        'project': project.split(' - ')[0],
+                        'duration': duration
+                    })
+                    st.success(f"Equipment booked for {booking_date}")
+                    st.rerun()
+
+    with tabs[4]:
+        # Alerts
+        st.markdown("### Equipment Alerts")
+
+        alerts = []
+        for eq in st.session_state.equipment:
+            days_to_cal = (eq['next_calibration'] - datetime.now().date()).days
+
+            if days_to_cal <= 0:
+                alerts.append(('🔴 Critical', f"{eq['name']}: Calibration OVERDUE by {abs(days_to_cal)} days"))
+            elif days_to_cal <= 30:
+                alerts.append(('🟠 Warning', f"{eq['name']}: Calibration due in {days_to_cal} days"))
+
+            if eq['performance_metric'] < 90:
+                alerts.append(('🟡 Attention', f"{eq['name']}: Low performance ({eq['performance_metric']:.1f}%)"))
+
+            if eq['utilization'] > 90:
+                alerts.append(('🟡 Attention', f"{eq['name']}: High utilization ({eq['utilization']}%)"))
+
+        if alerts:
+            for severity, message in alerts:
+                if 'Critical' in severity:
+                    st.error(f"{severity}: {message}")
+                elif 'Warning' in severity:
+                    st.warning(f"{severity}: {message}")
+                else:
+                    st.info(f"{severity}: {message}")
+        else:
+            st.success("✅ No alerts - all equipment in good condition")
+
+def render_advanced_manpower_management():
+    """Advanced Manpower Management with Skills, Performance, and Workload Analysis"""
+    st.subheader("👥 Advanced Manpower Management")
+
+    tabs = st.tabs(["Staff Registry", "Performance Metrics", "Workload Analysis", "Availability", "Skill Matrix"])
+
+    with tabs[0]:
+        # Staff Registry
+        st.markdown("### Staff Registry")
+        for emp in st.session_state.manpower:
+            with st.expander(f"{emp['name']} - {emp['role']}"):
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.write(f"**ID:** {emp['id']}")
+                    st.write(f"**Role:** {emp['role']}")
+                    st.write(f"**Availability:** {emp['availability']}")
+                    st.write(f"**Working Hours:** {emp.get('working_hours', 'N/A')}")
+
+                with col2:
+                    st.write(f"**Skills:** {', '.join(emp['skills'])}")
+                    st.write(f"**Certifications:** {', '.join(emp['certifications'])}")
+                    st.write(f"**Current Project:** {emp.get('current_project', 'None')}")
+
+                with col3:
+                    st.metric("Performance Score", f"{emp['performance_score']}")
+                    st.metric("Quality Score", f"{emp.get('quality_score', 'N/A')}")
+                    st.metric("Tasks Completed", emp.get('tasks_completed', 0))
+
+    with tabs[1]:
+        # Performance Metrics
+        st.markdown("### Performance Metrics")
+
+        perf_df = pd.DataFrame([
+            {
+                'Name': emp['name'],
+                'Role': emp['role'],
+                'Performance': emp['performance_score'],
+                'Quality': emp.get('quality_score', emp['performance_score']),
+                'Speed': emp.get('speed_score', 90),
+                'Tasks Done': emp.get('tasks_completed', 0),
+                'Hours Logged': emp['hours_logged']
+            }
+            for emp in st.session_state.manpower
+        ])
+
+        st.dataframe(perf_df, use_container_width=True)
+
+        # Performance charts
+        fig = make_subplots(
+            rows=1, cols=2,
+            subplot_titles=('Performance vs Quality', 'Tasks Completed')
+        )
+
+        fig.add_trace(
+            go.Scatter(x=perf_df['Performance'], y=perf_df['Quality'],
+                      mode='markers+text', text=perf_df['Name'],
+                      textposition='top center',
+                      marker=dict(size=12, color=perf_df['Performance'], colorscale='Viridis')),
+            row=1, col=1
+        )
+
+        fig.add_trace(
+            go.Bar(x=perf_df['Name'], y=perf_df['Tasks Done']),
+            row=1, col=2
+        )
+
+        fig.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
+
+    with tabs[2]:
+        # Workload Analysis
+        st.markdown("### Workload Analysis")
+
+        workload_df = pd.DataFrame([
+            {
+                'Staff': emp['name'],
+                'Current Load (%)': emp.get('current_workload', 75),
+                'Capacity (hrs/week)': emp.get('capacity_hours', 40),
+                'Utilization': f"{emp.get('current_workload', 75)}%",
+                'Remaining Capacity': f"{emp.get('capacity_hours', 40) * (1 - emp.get('current_workload', 75)/100):.1f}h"
+            }
+            for emp in st.session_state.manpower
+        ])
+
+        st.dataframe(workload_df, use_container_width=True)
+
+        # Workload chart
+        fig = go.Figure()
+        for emp in st.session_state.manpower:
+            workload = emp.get('current_workload', 75)
+            color = 'red' if workload > 90 else ('orange' if workload > 75 else 'green')
+            fig.add_trace(go.Bar(
+                x=[emp['name']],
+                y=[workload],
+                name=emp['name'],
+                marker_color=color,
+                showlegend=False
+            ))
+
+        fig.update_layout(
+            title="Staff Workload Distribution",
+            xaxis_title="Staff Member",
+            yaxis_title="Workload (%)",
+            height=400
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with tabs[3]:
+        # Availability
+        st.markdown("### Staff Availability")
+
+        for emp in st.session_state.manpower:
+            col1, col2 = st.columns([1, 3])
+
+            with col1:
+                status = "🟢 Available" if emp['availability'] == 'Available' else "🔴 Busy"
+                st.markdown(f"**{emp['name']}**")
+                st.write(status)
+
+            with col2:
+                if emp.get('schedule'):
+                    st.write("**Schedule:**")
+                    for entry in emp['schedule']:
+                        st.caption(f"📅 {entry['date']} | Task: {entry['task']} | {entry['hours']}h")
+                else:
+                    st.info("No scheduled tasks")
+
+    with tabs[4]:
+        # Skill Matrix
+        st.markdown("### Skill Matrix")
+
+        all_skills = set()
+        for emp in st.session_state.manpower:
+            all_skills.update(emp['skills'])
+
+        skill_matrix = []
+        for emp in st.session_state.manpower:
+            row = {'Name': emp['name'], 'Role': emp['role']}
+            for skill in all_skills:
+                row[skill] = '✓' if skill in emp['skills'] else ''
+            skill_matrix.append(row)
+
+        skill_df = pd.DataFrame(skill_matrix)
+        st.dataframe(skill_df, use_container_width=True)
+
+        # Skill distribution chart
+        skill_counts = {}
+        for skill in all_skills:
+            skill_counts[skill] = sum(1 for emp in st.session_state.manpower if skill in emp['skills'])
+
+        fig = go.Figure(data=[go.Bar(x=list(skill_counts.keys()), y=list(skill_counts.values()))])
+        fig.update_layout(title="Skill Distribution Across Team", xaxis_title="Skill", yaxis_title="Number of Staff")
+        st.plotly_chart(fig, use_container_width=True)
+
+def render_automation_notifications():
+    """Automation Rules and Notification Management"""
+    st.subheader("🤖 Automation & Notifications")
+
+    tabs = st.tabs(["Automation Rules", "Active Notifications", "Notification History", "Trigger Management"])
+
+    with tabs[0]:
+        # Automation Rules
+        st.markdown("### Automation Rules")
+
+        # Check and display triggered rules
+        triggered = check_automation_rules()
+        if triggered:
+            st.warning(f"⚠️ {len(triggered)} rule(s) triggered!")
+
+        for rule in st.session_state.automation_rules:
+            with st.expander(f"{'✅' if rule['enabled'] else '❌'} {rule['name']} - {rule['priority']}"):
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.write(f"**ID:** {rule['id']}")
+                    st.write(f"**Trigger:** {rule['trigger']}")
+                    st.write(f"**Condition:** {rule['condition']}")
+
+                with col2:
+                    st.write(f"**Action:** {rule['action']}")
+                    st.write(f"**Recipients:** {', '.join(rule['recipients'])}")
+                    st.write(f"**Priority:** {rule['priority']}")
+                    st.write(f"**Enabled:** {'Yes' if rule['enabled'] else 'No'}")
+
+                if st.button(f"{'Disable' if rule['enabled'] else 'Enable'} Rule", key=f"toggle_{rule['id']}"):
+                    rule['enabled'] = not rule['enabled']
+                    st.rerun()
+
+        # Add new rule
+        with st.expander("➕ Add New Automation Rule"):
+            with st.form("add_automation_rule"):
+                rule_name = st.text_input("Rule Name")
+                trigger_type = st.selectbox("Trigger Type",
+                                          ["Time-based", "Event-based", "Threshold-based", "Status-change"])
+                condition = st.text_area("Condition Description")
+                action = st.selectbox("Action", ["Send Email", "Create Notification", "Update Status", "Escalate"])
+                recipients = st.text_input("Recipients (comma-separated emails)")
+                priority = st.selectbox("Priority", ["High", "Medium", "Low"])
+
+                if st.form_submit_button("Create Rule"):
+                    new_rule = {
+                        'id': f'AR{len(st.session_state.automation_rules)+1:03d}',
+                        'name': rule_name,
+                        'trigger': trigger_type,
+                        'condition': condition,
+                        'action': action,
+                        'recipients': [r.strip() for r in recipients.split(',')],
+                        'enabled': True,
+                        'priority': priority,
+                        'created_date': datetime.now().date()
+                    }
+                    st.session_state.automation_rules.append(new_rule)
+                    st.success(f"Automation rule '{rule_name}' created!")
+                    st.rerun()
+
+    with tabs[1]:
+        # Active Notifications
+        st.markdown("### Active Notifications")
+
+        unread = [n for n in st.session_state.notifications if not n['read']]
+
+        if unread:
+            for notif in unread:
+                priority_color = {'High': '🔴', 'Medium': '🟡', 'Low': '🟢'}.get(notif['priority'], '🟦')
+
+                with st.expander(f"{priority_color} {notif['title']} - {notif['type']}"):
+                    st.write(f"**To:** {notif['recipient']}")
+                    st.write(f"**Message:** {notif['message']}")
+                    st.write(f"**Time:** {notif['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+                    st.write(f"**Priority:** {notif['priority']}")
+
+                    if st.button(f"Mark as Read", key=f"read_{notif['id']}"):
+                        notif['read'] = True
+                        st.rerun()
+        else:
+            st.success("✅ No unread notifications")
+
+    with tabs[2]:
+        # Notification History
+        st.markdown("### Notification History")
+
+        if st.session_state.notifications:
+            notif_df = pd.DataFrame([
+                {
+                    'Time': n['timestamp'].strftime('%Y-%m-%d %H:%M'),
+                    'Recipient': n['recipient'],
+                    'Type': n['type'],
+                    'Title': n['title'],
+                    'Priority': n['priority'],
+                    'Read': '✓' if n['read'] else '✗'
+                }
+                for n in sorted(st.session_state.notifications, key=lambda x: x['timestamp'], reverse=True)
+            ])
+
+            st.dataframe(notif_df, use_container_width=True)
+        else:
+            st.info("No notifications yet")
+
+    with tabs[3]:
+        # Trigger Management
+        st.markdown("### Manual Trigger Testing")
+
+        st.write("Test automation rules manually:")
+
+        test_rule = st.selectbox("Select Rule to Test",
+                                [r['name'] for r in st.session_state.automation_rules])
+
+        if st.button("Test Trigger"):
+            rule = next((r for r in st.session_state.automation_rules if r['name'] == test_rule), None)
+            if rule:
+                for recipient in rule['recipients']:
+                    create_notification(
+                        recipient=recipient,
+                        type='Test',
+                        title=f"Test: {rule['name']}",
+                        message=f"This is a test notification for rule '{rule['name']}'",
+                        priority=rule['priority']
+                    )
+                st.success(f"Test notification sent to {len(rule['recipients'])} recipient(s)")
+                st.rerun()
 
 def render_report_generation():
     """Render report generation interface"""
@@ -2388,14 +3703,27 @@ def render_export_data():
 
 # Notifications System
 def render_notifications():
-    """Render notifications panel"""
-    st.header("🔔 Notifications")
-    
-    # Mark all as read button
-    if st.button("Mark All as Read"):
-        for notif in st.session_state.notifications:
-            notif['read'] = True
-        st.rerun()
+    """Enhanced notifications with automation"""
+    st.header("🔔 Notifications & Automation")
+
+    # Tab view
+    tabs = st.tabs(["Notifications", "Automation & Triggers"])
+
+    with tabs[0]:
+        # Mark all as read button
+        if st.button("Mark All as Read"):
+            for notif in st.session_state.notifications:
+                notif['read'] = True
+            st.rerun()
+
+        # Continue with existing notification display code
+        render_notification_display()
+
+    with tabs[1]:
+        render_automation_notifications()
+
+def render_notification_display():
+    """Display notifications"""
     
     # Display notifications
     unread = [n for n in st.session_state.notifications if not n['read']]
