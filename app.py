@@ -68,6 +68,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Helper function for safe Plotly chart rendering
+def safe_plotly_chart(fig, use_container_width=True, key=None):
+    """Safely render a Plotly chart with error handling"""
+    try:
+        st.plotly_chart(fig, use_container_width=use_container_width, key=key)
+    except Exception as e:
+        st.error(f"Error rendering chart: {str(e)}")
+        st.info("Please check the data format or refresh the page.")
+
 # Initialize Session State
 def init_session_state():
     """Initialize all session state variables"""
@@ -410,7 +419,7 @@ def render_dashboard():
                               color='priority',
                               color_discrete_map={'High': '#ff4444', 'Medium': '#ffaa00', 
                                                  'Low': '#00aa00', 'Critical': '#880000'})
-            st.plotly_chart(fig, use_container_width=True)
+            safe_plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.subheader("📊 Resource Utilization")
@@ -428,7 +437,7 @@ def render_dashboard():
                     color='Utilization',
                     color_continuous_scale='RdYlGn_r')
         fig.update_layout(showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
     
     # Charts Row 2
     col1, col2 = st.columns(2)
@@ -441,7 +450,7 @@ def render_dashboard():
                         title="Tasks by Status",
                         color_discrete_map={'Completed': '#00aa00', 'In Progress': '#ffaa00',
                                           'Not Started': '#cccccc'})
-            st.plotly_chart(fig, use_container_width=True)
+            safe_plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.subheader("⚠️ Risk Matrix")
@@ -452,7 +461,7 @@ def render_dashboard():
                           labels=dict(x="Impact", y="Probability", color="Count"),
                           title="Risk Heat Map",
                           color_continuous_scale='Reds')
-            st.plotly_chart(fig, use_container_width=True)
+            safe_plotly_chart(fig, use_container_width=True)
     
     # Recent Activity Timeline
     st.subheader("📅 Recent Activity")
@@ -590,7 +599,7 @@ def render_gantt_chart():
             hovermode='closest'
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
 
 def render_critical_path():
     """Render critical path analysis"""
@@ -639,7 +648,7 @@ def render_critical_path():
             yaxis=dict(showticklabels=False, showgrid=False, range=[-1, 1])
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
         
         # Critical tasks table
         st.dataframe(
@@ -707,7 +716,7 @@ def render_milestones():
                 hovertemplate=f"<b>{milestone['name']}</b><br>Date: {milestone['end_date']}<br>Status: {milestone['status']}"
             ))
         
-        fig.add_vline(x=str(datetime.now().date(), line_dash="dash", line_color="red", 
+        fig.add_vline(x=str(datetime.now().date()), line_dash="dash", line_color="red",
                      annotation_text="Today")
         
         fig.update_layout(
@@ -718,7 +727,7 @@ def render_milestones():
             yaxis=dict(showticklabels=False)
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
         
         # Milestones table
         st.dataframe(
@@ -817,7 +826,7 @@ def render_calendar_view():
     month_start = selected_date.replace(day=1)
     month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
     
-    month_events = [e for e in events if month_start <= datetime.strptime(e['start'], '%Y-%m-%d').date()(e['start'])).date() <= month_end]
+    month_events = [e for e in events if month_start <= datetime.strptime(e['start'], '%Y-%m-%d').date() <= month_end]
     
     # Display events
     st.write(f"### Events for {selected_date.strftime('%B %Y')}")
@@ -919,7 +928,7 @@ def render_flowchart_view():
         yaxis=dict(showticklabels=False, showgrid=False, range=[-1, 1])
     )
     
-    st.plotly_chart(fig, use_container_width=True)
+    safe_plotly_chart(fig, use_container_width=True)
 
 def render_route_card_view():
     """Render route card view for samples"""
@@ -1088,7 +1097,7 @@ def render_equipment_management():
                     title="Equipment Performance (%)",
                     color='Performance',
                     color_continuous_scale='RdYlGn')
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
 
 def render_test_methods():
     """Render test methods management"""
@@ -1472,7 +1481,7 @@ def render_review_status():
             yaxis=dict(showticklabels=False)
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
 
 def render_escalations():
     """Render escalation management"""
@@ -1569,14 +1578,14 @@ def render_manpower_management():
         fig = px.pie(values=[available, busy], names=['Available', 'Busy'],
                     title="Team Availability",
                     color_discrete_map={'Available': 'green', 'Busy': 'red'})
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
         
         # Performance distribution
         performance_scores = [p['performance_score'] for p in st.session_state.manpower]
         fig = px.histogram(x=performance_scores, nbins=5,
                          title="Performance Score Distribution",
                          labels={'x': 'Performance Score', 'y': 'Count'})
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
 
 def render_equipment_booking():
     """Render equipment booking interface"""
@@ -1686,7 +1695,7 @@ def render_performance_metrics():
                     title="Performance Scores",
                     color='Score',
                     color_continuous_scale='RdYlGn')
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.markdown("### Productivity Metrics")
@@ -1710,7 +1719,7 @@ def render_performance_metrics():
         fig = px.line(trend_data, x='Date', y='Utilization',
                      title="7-Day Utilization Trend",
                      markers=True)
-        st.plotly_chart(fig, use_container_width=True)
+        safe_plotly_chart(fig, use_container_width=True)
 
 # Risk & Issue Management
 def render_risk_issues():
@@ -1990,7 +1999,7 @@ def render_risk_matrix():
         height=400
     )
     
-    st.plotly_chart(fig, use_container_width=True)
+    safe_plotly_chart(fig, use_container_width=True)
     
     # Risk details by quadrant
     st.markdown("### Risk Details by Severity")
