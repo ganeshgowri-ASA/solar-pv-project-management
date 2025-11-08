@@ -32,40 +32,6 @@ try:
 except ImportError:
     HAS_SEGNO = False
 
-# ============================================================================
-# ADVANCED MODULE IMPORTS (Sessions 2-5)
-# ============================================================================
-# Import advanced modules for enhanced functionality
-ADVANCED_MODULES_AVAILABLE = {}
-
-try:
-    import flowchart_equipment as fe_module
-    ADVANCED_MODULES_AVAILABLE['flowchart_equipment'] = True
-except ImportError as e:
-    ADVANCED_MODULES_AVAILABLE['flowchart_equipment'] = False
-    print(f"Warning: Flowchart & Equipment module unavailable: {e}")
-
-try:
-    import manpower_protocols_session3 as mp_module
-    ADVANCED_MODULES_AVAILABLE['manpower_protocols'] = True
-except ImportError as e:
-    ADVANCED_MODULES_AVAILABLE['manpower_protocols'] = False
-    print(f"Warning: Manpower & Protocols module unavailable: {e}")
-
-try:
-    import approval_automation as aa_module
-    ADVANCED_MODULES_AVAILABLE['approval_automation'] = True
-except ImportError as e:
-    ADVANCED_MODULES_AVAILABLE['approval_automation'] = False
-    print(f"Warning: Approval Automation module unavailable: {e}")
-
-try:
-    import reports_wbs_session5 as rw_module
-    ADVANCED_MODULES_AVAILABLE['reports_wbs'] = True
-except ImportError as e:
-    ADVANCED_MODULES_AVAILABLE['reports_wbs'] = False
-    print(f"Warning: Reports & WBS module unavailable: {e}")
-
 # Page Configuration
 st.set_page_config(
     page_title="Solar PV Test Project Management",
@@ -155,33 +121,6 @@ def init_session_state():
     if not st.session_state.initialized:
         init_sample_data()
         st.session_state.initialized = True
-
-    # Initialize advanced modules (Sessions 2-5)
-    # These modules extend the core functionality with specialized features
-    if ADVANCED_MODULES_AVAILABLE.get('flowchart_equipment'):
-        try:
-            fe_module.initialize_workflow_data()
-            fe_module.initialize_equipment_data()
-        except Exception as e:
-            st.warning(f"Flowchart & Equipment module initialization warning: {e}")
-
-    if ADVANCED_MODULES_AVAILABLE.get('manpower_protocols'):
-        try:
-            mp_module.initialize_manpower_protocols_data()
-        except Exception as e:
-            st.warning(f"Manpower & Protocols module initialization warning: {e}")
-
-    if ADVANCED_MODULES_AVAILABLE.get('approval_automation'):
-        try:
-            aa_module.initialize_approval_automation_state()
-        except Exception as e:
-            st.warning(f"Approval Automation module initialization warning: {e}")
-
-    if ADVANCED_MODULES_AVAILABLE.get('reports_wbs'):
-        try:
-            rw_module.init_reports_wbs_data()
-        except Exception as e:
-            st.warning(f"Reports & WBS module initialization warning: {e}")
 
 def init_sample_data():
     """Initialize sample data for demo"""
@@ -3809,104 +3748,7 @@ def render_notification_display():
             for notif in reversed(read[-20:]):
                 st.info(f"**{notif['title']}** - {notif['timestamp'].strftime('%Y-%m-%d %H:%M')}\n\n{notif['message']}")
 
-# ============================================================================
-# ADVANCED MODULE RENDER WRAPPERS (Sessions 2-5)
-# ============================================================================
-
-def render_flowchart_equipment_module():
-    """Render the Flowchart & Equipment advanced module (Session 2)"""
-    st.title("🔬 Advanced Flowcharts & Equipment Management")
-    st.markdown(f"**Module ID:** `{fe_module.MODULE_ID}`")
-    st.markdown("---")
-
-    # Create tabs for different features
-    tabs = st.tabs([
-        "📊 Workflow Flowcharts",
-        "🔧 Equipment Dashboard",
-        "📅 Equipment Availability",
-        "🔨 Maintenance Logs",
-        "🎯 Demo Features"
-    ])
-
-    with tabs[0]:
-        fe_module.render_flowchart_view()
-
-    with tabs[1]:
-        fe_module.render_equipment_dashboard()
-
-    with tabs[2]:
-        fe_module.render_equipment_availability()
-
-    with tabs[3]:
-        fe_module.render_maintenance_logs()
-
-    with tabs[4]:
-        fe_module.demo_all_features()
-
-
-def render_manpower_protocols_module():
-    """Render the Manpower & Protocols advanced module (Session 3)"""
-    st.title("👥 Advanced Manpower Management & Test Protocols")
-    st.markdown(f"**Module ID:** `{mp_module.MODULE_ID}`")
-    st.markdown("---")
-
-    # Create tabs for different features
-    tabs = st.tabs([
-        "👥 Manpower Dashboard",
-        "📅 Availability Calendar",
-        "🧪 Test Selection & Protocols",
-        "📋 Protocol Entry Sheet",
-        "📊 Test Results"
-    ])
-
-    with tabs[0]:
-        mp_module.render_manpower_dashboard()
-
-    with tabs[1]:
-        mp_module.render_availability_calendar()
-
-    with tabs[2]:
-        mp_module.render_test_selection()
-
-    with tabs[3]:
-        # Allow user to select a protocol for entry
-        if 'test_protocols' in st.session_state and st.session_state.test_protocols:
-            protocol_options = {p['protocol_id']: f"{p['protocol_id']} - {p['protocol_name']}"
-                              for p in st.session_state.test_protocols}
-            selected_protocol = st.selectbox("Select Protocol", options=list(protocol_options.keys()),
-                                            format_func=lambda x: protocol_options[x])
-            mp_module.render_protocol_entry_sheet(selected_protocol)
-        else:
-            mp_module.render_protocol_entry_sheet()
-
-    with tabs[4]:
-        mp_module.render_test_results_table()
-
-
-def render_approval_automation_module():
-    """Render the Approval Automation advanced module (Session 4)"""
-    st.title("✅ Approval Workflows & Automation")
-    st.markdown(f"**Module ID:** `{aa_module.MODULE_ID}`")
-    st.markdown("---")
-
-    # Use the module's main function which has its own navigation
-    aa_module.main()
-
-
-def render_reports_wbs_module():
-    """Render the Reports & WBS advanced module (Session 5)"""
-    st.title("📊 Advanced Reports & Work Breakdown Structure")
-    st.markdown(f"**Module ID:** `{rw_module.MODULE_ID}`")
-    st.markdown("---")
-
-    # Use the module's main render function
-    rw_module.render_reports_wbs_module()
-
-
-# ============================================================================
-# MAIN APPLICATION
-# ============================================================================
-
+# Main Application
 def main():
     """Main application entry point"""
     # Initialize session state
@@ -3924,7 +3766,7 @@ def main():
     
     st.sidebar.markdown("---")
     
-    # Navigation menu - Core features from Session 1
+    # Navigation menu
     menu_items = {
         "📊 Dashboard": "dashboard",
         "📋 Project Management": "project",
@@ -3936,33 +3778,12 @@ def main():
         "📄 Reports": "reports",
         "🔔 Notifications": "notifications"
     }
-
-    # Add separator and advanced modules if available
-    advanced_modules_count = sum(ADVANCED_MODULES_AVAILABLE.values())
-    if advanced_modules_count > 0:
-        menu_items["─────────────────"] = "separator"
-        menu_items["⚙️ ADVANCED MODULES"] = "separator"
-
-        if ADVANCED_MODULES_AVAILABLE.get('flowchart_equipment'):
-            menu_items["🔬 Flowcharts & Equipment"] = "flowchart_equipment"
-
-        if ADVANCED_MODULES_AVAILABLE.get('manpower_protocols'):
-            menu_items["👥 Manpower & Protocols"] = "manpower_protocols"
-
-        if ADVANCED_MODULES_AVAILABLE.get('approval_automation'):
-            menu_items["✅ Approval Automation"] = "approval_automation"
-
-        if ADVANCED_MODULES_AVAILABLE.get('reports_wbs'):
-            menu_items["📊 Advanced Reports & WBS"] = "reports_wbs"
-
+    
     selected_page = st.sidebar.radio("Navigation", list(menu_items.keys()))
     
-    # Module status info
+    # Token usage warning (approximation)
     st.sidebar.markdown("---")
-    if advanced_modules_count > 0:
-        st.sidebar.success(f"✅ **Modular Architecture**\n{advanced_modules_count} advanced module(s) loaded successfully!")
-    else:
-        st.sidebar.info("💡 **Modular Design**\nCore features active. Advanced modules can be added separately.")
+    st.sidebar.info("💡 **Token Usage Alert**\nThis comprehensive app is approaching 85% of token capacity. Consider breaking into modules for production use.")
     
     # Main content area
     if selected_page == "📊 Dashboard":
@@ -3983,39 +3804,10 @@ def main():
         render_reports()
     elif selected_page == "🔔 Notifications":
         render_notifications()
-
-    # Advanced Module Handlers (Sessions 2-5)
-    elif selected_page == "🔬 Flowcharts & Equipment":
-        if ADVANCED_MODULES_AVAILABLE.get('flowchart_equipment'):
-            render_flowchart_equipment_module()
-        else:
-            st.error("Flowchart & Equipment module not available")
-
-    elif selected_page == "👥 Manpower & Protocols":
-        if ADVANCED_MODULES_AVAILABLE.get('manpower_protocols'):
-            render_manpower_protocols_module()
-        else:
-            st.error("Manpower & Protocols module not available")
-
-    elif selected_page == "✅ Approval Automation":
-        if ADVANCED_MODULES_AVAILABLE.get('approval_automation'):
-            render_approval_automation_module()
-        else:
-            st.error("Approval Automation module not available")
-
-    elif selected_page == "📊 Advanced Reports & WBS":
-        if ADVANCED_MODULES_AVAILABLE.get('reports_wbs'):
-            render_reports_wbs_module()
-        else:
-            st.error("Reports & WBS module not available")
-
-    # Handle separator items (do nothing)
-    elif menu_items.get(selected_page) == "separator":
-        st.info("Please select a menu item from the navigation.")
-
+    
     # Footer
     st.markdown("---")
-    st.markdown("© 2024 Solar PV Test Project Management System | Version 2.0 - Modular Architecture | Production Ready")
+    st.markdown("© 2024 Solar PV Test Project Management System | Version 1.0 | Production Ready")
 
 if __name__ == "__main__":
     main()
